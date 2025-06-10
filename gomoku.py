@@ -46,16 +46,41 @@ class Gomoku:
     def ai_move(self):
         if self.game_over:
             return
-        empty = [(x, y) for y in range(BOARD_SIZE) for x in range(BOARD_SIZE) if self.board[y][x] == 0]
-        if not empty:
-            self.end_game('Draw!')
-            return
-        x, y = random.choice(empty)
+
+        move = self.best_move()
+        if move is None:
+            empty = [(x, y) for y in range(BOARD_SIZE) for x in range(BOARD_SIZE) if self.board[y][x] == 0]
+            if not empty:
+                self.end_game('Draw!')
+                return
+            move = random.choice(empty)
+
+        x, y = move
         self.place_stone(x, y, -1)
         if self.check_win(x, y):
             self.end_game('Computer wins!')
             return
         self.turn = 1
+
+    def best_move(self):
+        empty = [(x, y) for y in range(BOARD_SIZE) for x in range(BOARD_SIZE) if self.board[y][x] == 0]
+        # First, see if the AI can win immediately
+        for x, y in empty:
+            self.board[y][x] = -1
+            if self.check_win(x, y):
+                self.board[y][x] = 0
+                return (x, y)
+            self.board[y][x] = 0
+
+        # Then, block the player's winning move
+        for x, y in empty:
+            self.board[y][x] = 1
+            if self.check_win(x, y):
+                self.board[y][x] = 0
+                return (x, y)
+            self.board[y][x] = 0
+
+        return None
 
     def place_stone(self, x, y, player):
         self.board[y][x] = player
