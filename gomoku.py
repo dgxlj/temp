@@ -64,7 +64,8 @@ class Gomoku:
 
     def best_move(self):
         empty = [(x, y) for y in range(BOARD_SIZE) for x in range(BOARD_SIZE) if self.board[y][x] == 0]
-        # First, see if the AI can win immediately
+
+        # Check for an immediate winning move
         for x, y in empty:
             self.board[y][x] = -1
             if self.check_win(x, y):
@@ -72,7 +73,7 @@ class Gomoku:
                 return (x, y)
             self.board[y][x] = 0
 
-        # Then, block the player's winning move
+        # Block the player's winning move if possible
         for x, y in empty:
             self.board[y][x] = 1
             if self.check_win(x, y):
@@ -80,7 +81,43 @@ class Gomoku:
                 return (x, y)
             self.board[y][x] = 0
 
-        return None
+        # Evaluate moves heuristically
+        best_score = -1
+        best = None
+        for x, y in empty:
+            offensive = self.evaluate_score(x, y, -1)
+            defensive = self.evaluate_score(x, y, 1)
+            score = offensive * 1.2 + defensive
+            if score > best_score:
+                best_score = score
+                best = (x, y)
+
+        return best
+
+    def evaluate_score(self, x, y, player):
+        directions = [(1,0), (0,1), (1,1), (1,-1)]
+        total = 0
+        for dx, dy in directions:
+            count = 1
+            open_ends = 0
+            i = 1
+            while 0 <= x + dx*i < BOARD_SIZE and 0 <= y + dy*i < BOARD_SIZE and self.board[y + dy*i][x + dx*i] == player:
+                count += 1
+                i += 1
+            if 0 <= x + dx*i < BOARD_SIZE and 0 <= y + dy*i < BOARD_SIZE and self.board[y + dy*i][x + dx*i] == 0:
+                open_ends += 1
+            i = 1
+            while 0 <= x - dx*i < BOARD_SIZE and 0 <= y - dy*i < BOARD_SIZE and self.board[y - dy*i][x - dx*i] == player:
+                count += 1
+                i += 1
+            if 0 <= x - dx*i < BOARD_SIZE and 0 <= y - dy*i < BOARD_SIZE and self.board[y - dy*i][x - dx*i] == 0:
+                open_ends += 1
+
+            if open_ends == 0 and count < 5:
+                continue
+            total += (count + open_ends * 0.5) ** 2
+
+        return total
 
     def place_stone(self, x, y, player):
         self.board[y][x] = player

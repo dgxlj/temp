@@ -1,6 +1,6 @@
 # Gomoku Game
 
-This repository contains a simple Gomoku (Five-in-a-Row) game implemented with Python's `tkinter` GUI toolkit. A single player can play against a computer opponent. The AI now looks for immediate wins and blocks your winning moves when possible.
+This repository contains a simple Gomoku (Five-in-a-Row) game implemented with Python's `tkinter` GUI toolkit. A single player can play against a computer opponent. The AI searches for winning or blocking moves first and then picks the most promising position based on nearby stones.
 
 ## Requirements
 
